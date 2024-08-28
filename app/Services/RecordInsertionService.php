@@ -108,6 +108,9 @@ class RecordInsertionService
             fwrite($file, $sql);
             fclose($file);
 
+            // Exec shell
+            $this->executeSql();
+
             //DotRecordProperty::insert($this->recordProperties);
             
         });
@@ -127,6 +130,7 @@ class RecordInsertionService
 
         $sqlPath = $this->sql_file;
         $command = "mysql -u{$username} -p{$password} -h {$host} {$database} < {$sqlPath}";
+        echo $command;
 
         shell_exec($command);
 

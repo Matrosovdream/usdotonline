@@ -31,9 +31,11 @@ Route::post('/', function() {
 
 Route::get('/stat', function() {
 
-    $recordCount = DotRecord::count();
+    $recordCount = DotRecord::whereNotNull('created_at')->count();
 
-    $records = DotRecord::orderBy('created_at', 'desc')->paginate(5);
+    $records = DotRecord::whereNotNull('created_at')
+                ->orderBy('created_at', 'desc')
+                ->paginate(5);
 
     /*
     $records->load('properties');

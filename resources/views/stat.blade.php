@@ -47,10 +47,10 @@
                                 {{ $record->name }}
                             </th>
                             <td class="px-6 py-4">
-                                {{ $record->created_at->format('Y-m-d H:i') }}
+                                {{ $record->created_at }}
                             </td>
                             <td class="px-6 py-4">
-                                {{ $record->updated_at->format('Y-m-d H:i') }}
+                                {{ $record->updated_at }}
                             </td>
                         </tr>
                     @endforeach

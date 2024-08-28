@@ -24,7 +24,7 @@ class ParseApiRecords extends Command
         $chunkSize = $this->argument('chunkSize');
 
         // Remove all records before
-        DB::table('dot_record')->delete();
+        //DB::table('dot_record')->delete();
 
         DotRecordSource::create(['name' => 'Gov']);
 

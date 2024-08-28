@@ -91,6 +91,7 @@ class RecordInsertionService
                 $property['dot_record_id'] = $lastInsertedIds[intdiv($index, $this->chunkSize)];
             }
 
+            /*
             $sql = '';
 
             // Prepare remove old properties sql query
@@ -104,12 +105,14 @@ class RecordInsertionService
                 
             }
 
+            
             $file = fopen($this->sql_file, "a");
             fwrite($file, $sql);
             fclose($file);
 
             // Exec shell
             $this->executeSql();
+            */
 
             //DotRecordProperty::insert($this->recordProperties);
             

@@ -77,9 +77,15 @@ class RecordInsertionService
         DB::transaction(function () {
 
             // Upsert the main records
+            $mainRecordData = [];
             foreach ($this->mainRecords as $mainRecord) {
-                DotRecord::updateOrCreate(['name' => $mainRecord['name']], $mainRecord);
+                $mainRecordData[] = [
+                    'name' => $mainRecord['name'],
+                    'source_id' => $mainRecord['source_id'],
+                ];
             }
+
+            DotRecord::upsert($mainRecordData, ['name'], ['source_id']);
 
             // Retrieve the last inserted main record IDs for the foreign key association
             $lastInsertedIds = DotRecord::whereIn('name', array_column($this->mainRecords, 'name'))
@@ -90,6 +96,17 @@ class RecordInsertionService
             foreach ($this->recordProperties as $index => &$property) {
                 $property['dot_record_id'] = $lastInsertedIds[intdiv($index, $this->chunkSize)];
             }
+
+            // Remove props if count > 3
+            if (count($this->recordProperties) > 3) {
+                $this->recordProperties = array_slice($this->recordProperties, 0, 3);
+            }
+
+            // Remove all properties from table before insert
+            DotRecordProperty::whereIn('dot_record_id', $lastInsertedIds)->delete();
+
+            // Insert new properties
+            DotRecordProperty::insert($this->recordProperties);
 
             /*
             $sql = '';
@@ -114,7 +131,7 @@ class RecordInsertionService
             $this->executeSql();
             */
 
-            //DotRecordProperty::insert($this->recordProperties);
+            DotRecordProperty::insert($this->recordProperties);
             
         });
 

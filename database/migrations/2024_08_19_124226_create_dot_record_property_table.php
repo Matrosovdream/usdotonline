@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('dot_record_properties', function (Blueprint $table) {
-            $table->id();
             $table->unsignedBigInteger('dot_record_id');
             $table->string('property_name');
             $table->string('property_value');

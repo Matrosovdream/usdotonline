@@ -99,11 +99,13 @@ class RecordInsertionService
 
             // Remove props if count > 3
             if (count($this->recordProperties) > 3) {
-                $this->recordProperties = array_slice($this->recordProperties, 0, 3);
+                //$this->recordProperties = array_slice($this->recordProperties, 0, 3);
             }
 
             // Remove all properties from table before insert
             DotRecordProperty::whereIn('dot_record_id', $lastInsertedIds)->delete();
+
+            //dd($this->recordProperties);
 
             // Insert new properties
             DotRecordProperty::insert($this->recordProperties);
@@ -130,8 +132,6 @@ class RecordInsertionService
             // Exec shell
             $this->executeSql();
             */
-
-            DotRecordProperty::insert($this->recordProperties);
             
         });
 

@@ -16,9 +16,6 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->unsignedBigInteger('source_id');
             $table->timestamps();
-
-            $table->foreign('source_id')->references('id')->on('dot_record_sources')->onDelete('cascade');
-
         });
 
     }

@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dot_record_properties', function (Blueprint $table) {
-            $table->unsignedBigInteger('dot_record_id');
-            $table->string('property_name');
-            $table->string('property_value');
-            $table->timestamps();
+        Schema::table('dot_records', function (Blueprint $table) {
+            $table->foreign('source_id')->references('id')->on('dot_record_sources')->onDelete('cascade');
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dot_record_properties');
+        Schema::table('dot_records', function (Blueprint $table) {
+            $table->dropForeign(['source_id']);
+        });
     }
 };

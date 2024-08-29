@@ -26,18 +26,18 @@ class RecordInsertionService
         foreach ($records as $record) {
             $mainRecordData = [
                 'name' => $record['dot_number'],
-                'source_id' => 1,
+                'source_id' => 1, // By default
             ];
 
             $this->mainRecords[] = $mainRecordData;
 
             // Prepare properties
             $properties = $record;
-            unset($properties['dot_number']);
+            //unset($properties['dot_number']);
 
             // Assume each record has a 'properties' key containing an array of properties
             foreach ($properties as $propertyName => $propertyValue) {
-                $this->recordProperties[] = [
+                $this->recordProperties[ $properties['dot_number'] ][] = [
                     'property_name' => $propertyName,
                     'property_value' => $propertyValue,
                 ];
@@ -88,56 +88,67 @@ class RecordInsertionService
             DotRecord::upsert($mainRecordData, ['name'], ['source_id']);
 
             // Retrieve the last inserted main record IDs for the foreign key association
-            $lastInsertedIds = DotRecord::whereIn('name', array_column($this->mainRecords, 'name'))
-                ->pluck('id')
+            $lastInsertedRecords = DotRecord::whereIn('name', array_column($this->mainRecords, 'name'))
+                ->pluck('id', 'name')
                 ->toArray();
 
+             
+
             // Update the foreign key references in the recordProperties array
-            foreach ($this->recordProperties as $index => &$property) {
-                $property['dot_record_id'] = $lastInsertedIds[intdiv($index, $this->chunkSize)];
+            $rawProps = [];
+            foreach ($this->recordProperties as $dot_number => $properties) {
+                foreach ($properties as $index => &$property) {
+                    $property['dot_record_id'] = $lastInsertedRecords[$dot_number];
+                    $rawProps[] = $property;
+                }
             }
 
-            // Remove props if count > 3
-            if (count($this->recordProperties) > 3) {
-                //$this->recordProperties = array_slice($this->recordProperties, 0, 3);
-            }
+            //dd($rawProps);   
 
             // Remove all properties from table before insert
-            DotRecordProperty::whereIn('dot_record_id', $lastInsertedIds)->delete();
+            DotRecordProperty::whereIn('dot_record_id', $lastInsertedRecords)->delete();
 
             //dd($this->recordProperties);
 
             // Insert new properties
-            DotRecordProperty::insert($this->recordProperties);
+            DotRecordProperty::insert($rawProps);
 
-            /*
-            $sql = '';
-
-            // Prepare remove old properties sql query
-            $sql = "DELETE FROM dot_record_properties WHERE dot_record_id IN (". implode(',', $lastInsertedIds) .");". PHP_EOL;
-
-            // Prepare sql query and insert into the file
-            foreach ($this->recordProperties as $index => &$property) {
-
-                $sql .= "INSERT INTO dot_record_properties (dot_record_id, property_name, property_value) VALUES ";
-                $sql .= "({$property['dot_record_id']}, '{$property['property_name']}', '". addslashes($property['property_value']) ."');". PHP_EOL;
-                
-            }
-
-            
-            $file = fopen($this->sql_file, "a");
-            fwrite($file, $sql);
-            fclose($file);
-
-            // Exec shell
-            $this->executeSql();
-            */
+            // Insert into the file
+            //$this->addToFile( $lastInsertedIds, $this->recordProperties );
             
         });
 
         // Clear the arrays for the next chunk
         $this->mainRecords = [];
         $this->recordProperties = [];
+    }
+
+    private function addToFile( $lastInsertedIds, $recordProperties )
+    {
+        $sql = '';
+
+        // Prepare remove old properties sql query
+        $sql = "DELETE FROM dot_record_properties WHERE dot_record_id IN (". implode(',', $lastInsertedIds) .");". PHP_EOL;
+
+        // Prepare sql query and insert into the file
+        foreach ($recordProperties as $index => &$property) {
+
+            $sql .= "INSERT INTO dot_record_properties (dot_record_id, property_name, property_value) VALUES ";
+            $sql .= "({$property['dot_record_id']}, '{$property['property_name']}', '". addslashes($property['property_value']) ."');". PHP_EOL;
+            
+        }
+
+        
+        $file = fopen($this->sql_file, "a");
+        fwrite($file, $sql);
+        fclose($file);
+
+        // Exec shell
+        $this->executeSql();
+
+        // Clear the file
+        $this->clearSqlFile();
+
     }
 
     private function executeSql()
@@ -154,6 +165,13 @@ class RecordInsertionService
 
         shell_exec($command);
 
+    }
+
+    private function clearSqlFile()
+    {
+        $file = fopen($this->sql_file, "w");
+        fwrite($file, '');
+        fclose($file);
     }
 
 }

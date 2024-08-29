@@ -10,37 +10,58 @@ use App\API\TransportationGov;
 
 class ParseApiRecords extends Command
 {
-    protected $signature = 'api:parse-records {totalRecords=10000} {chunkSize=100}';
+    protected $signature = 'api:parse-records {totalRecords=10000} {offset=0} {chunkSize=200}';
 
     protected $description = 'Parse records from API in chunks';
 
     public function handle()
     {
-
         ini_set('max_execution_time', 10000);
         ini_set('memory_limit', '512M');
 
         $totalRecords = $this->argument('totalRecords');
+        $offset = $this->argument('offset');
         $chunkSize = $this->argument('chunkSize');
 
         // Remove all records before
         //DB::table('dot_record')->delete();
 
-        DotRecordSource::create(['name' => 'Gov']);
+        DotRecordSource::updateOrCreate(['name' => 'Gov'], ['name' => 'Gov']);
 
         $recordService = new RecordInsertionService();
         $api = new TransportationGov();
 
-        for ($offset = 0; $offset < $totalRecords; $offset += $chunkSize) {
-            $this->info("Processing records from offset: $offset");
+        // Get records from API
+        $records = $api->getRecords($totalRecords, $offset);
 
-            $records = $api->getRecords($chunkSize, $offset);
+        // Split records into chunks
+        $chunks = array_chunk($records, $chunkSize);
 
-            $recordService->insertRecords($records);
+        //dd($chunks);
+
+        // Process each chunk
+        $count = 0;
+        foreach ($chunks as $chunk) {
+            
+            $recordService->insertRecords($chunk);
+
+            $count += count($chunk);
+            $this->info("Processing records from offset: $count");
 
         }
 
         $this->info('All records processed successfully.');
+
+        /*
+        for ($currentOffset = $offset; $currentOffset < $totalRecords; $currentOffset += $chunkSize) {
+            $this->info("Processing records from offset: $currentOffset");
+
+            $records = $api->getRecords($chunkSize, $currentOffset);
+
+            $recordService->insertRecords($records);
+        }
+        */
+        
     }
 
     protected function processRecord($record)

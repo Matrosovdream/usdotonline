@@ -29,7 +29,7 @@ Route::post('/', function() {
 })->name('search');
 */
 
-Route::get('/stat', function() {
+Route::get('/records', function() {
 
     $recordCount = DotRecord::whereNotNull('created_at')->count();
 
@@ -44,12 +44,33 @@ Route::get('/stat', function() {
     }
     */
 
-    return view('stat', [
+    return view('records', [
         'recordCount' => $recordCount,
         'records' => $records
     ]);
 
+})->name('records');
+
+Route::get('/records/{name}', function($name) {
+
+    $record = DotRecord::where('name', $name)->first();
+
+    return view('record', [
+        'record' => $record
+    ]);
+
+})->name('record');
+
+
+Route::get('/load', function() {
+    Artisan::call('api:parse-records', [
+        'totalRecords' => 5,
+        'chunkSize' => 5
+    ]);
+
+    return 'Command executed successfully.';
 });
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');

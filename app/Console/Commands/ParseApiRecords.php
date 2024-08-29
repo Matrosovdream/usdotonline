@@ -17,7 +17,7 @@ class ParseApiRecords extends Command
     public function handle()
     {
         ini_set('max_execution_time', 10000);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '3000M');
 
         $totalRecords = $this->argument('totalRecords');
         $offset = $this->argument('offset');

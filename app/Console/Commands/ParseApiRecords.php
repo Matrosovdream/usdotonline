@@ -64,8 +64,4 @@ class ParseApiRecords extends Command
         
     }
 
-    protected function processRecord($record)
-    {
-        echo "Processing record: " . json_encode($record) . PHP_EOL;
-    }
 }

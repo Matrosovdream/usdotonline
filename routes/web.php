@@ -3,13 +3,18 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Models\DotRecord;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
 
     if (request('search')) {
-        $records = DotRecord::where('name', request('search'))->get();
+        $records = DotRecord::where('name', 'like', '%' . request('search') . '%')->paginate(5);
     } else {
         $records = [];
+    }
+
+    foreach( $records as $record ) {
+        $record->properties = $record->properties()->get()->pluck('property_value', 'property_name');
     }
 
     return view('welcome', [
@@ -55,8 +60,17 @@ Route::get('/records/{name}', function($name) {
 
     $record = DotRecord::where('name', $name)->first();
 
+    $record->properties = $record->properties()->get()->pluck('property_value', 'property_name');
+
+
+
+    if( isset($_GET['debug']) ) {
+
+        dd($record->properties);
+    }
+
     return view('record', [
-        'record' => $record
+        'record' => $record,
     ]);
 
 })->name('record');

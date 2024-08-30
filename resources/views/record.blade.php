@@ -34,7 +34,7 @@
 
     <div class="bg-gray-800 py-8">
 
-        <div class="container mx-auto w-full text-white px-4 py-2 w-4/5">
+        <div class="container mx-auto text-white px-4 py-2 w-4/5">
             <div class="flex justify-between items-center mb-4">
                 <div>
                     <h1 class="text-3xl font-bold">
@@ -130,7 +130,7 @@
 
     <br/>
 
-    <div class="container mx-auto w-full text-black px-4 py-2 w-4/5">
+    <div class="container mx-auto text-black px-4 py-2 w-4/5">
         <h1 class="text-2xl font-bold mb-4">Contacts</h1>
         <div class="flex space-x-4">
             <!-- Names Column -->
@@ -205,7 +205,7 @@
     <br/><br/>
 
 
-    <div class="container mx-auto w-full text-black px-4 py-2 w-4/5">
+    <div class="container mx-auto text-black px-4 py-2 w-4/5">
         <h1 class="text-2xl font-bold text-gray-700 mb-4">General</h1>
 
         <div class="mb-4">

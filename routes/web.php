@@ -2,37 +2,13 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Models\DotRecord;
 use Illuminate\Http\Request;
 
-Route::get('/', function () {
+use App\Http\Middleware\RoleMiddleware;
 
-    if (request('search')) {
-        $records = DotRecord::where('name', 'like', '%' . request('search') . '%')->paginate(5);
-    } else {
-        $records = [];
-    }
 
-    foreach( $records as $record ) {
-        $record->properties = $record->properties()->get()->pluck('property_value', 'property_name');
-    }
+Route::get('/', [App\Http\Controllers\FrontPage::class, 'index'])->name('frontpage');
 
-    return view('welcome', [
-        'records' => $records
-    ]);
-});
-
-/*
-Route::post('/', function() {
-
-    $records = DotRecord::where('name', request('search'))->first();
-
-    return view('welcome', [
-        'records' => $records
-    ]);
-
-})->name('search');
-*/
 
 Route::get('/records', function() {
 
@@ -74,6 +50,12 @@ Route::get('/records/{name}', function($name) {
     ]);
 
 })->name('record');
+
+
+
+Route::get('/admin', function(){
+    return 'Just admin can visit this page';
+})->middleware('role:admin');
 
 
 Route::get('/load', function() {

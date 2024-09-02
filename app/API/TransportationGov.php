@@ -5,8 +5,13 @@ use Illuminate\Support\Facades\Http;
 
 class TransportationGov {
 
-    private $base_url = 'https://data.transportation.gov/';
-    private $records_path = 'resource/az4n-8mr2.json';
+    protected $base_url;
+    protected $records_path;
+
+    public function __construct() {
+        $this->base_url = config('services.transportationgov.base_url');
+        $this->records_path = config('services.transportationgov.records_path');
+    }
 
     public function getRecords($limit = 100, $offset = 0) {
 

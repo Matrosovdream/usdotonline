@@ -16,7 +16,10 @@ class DotRecordProperty extends Model
         return $this->belongsTo(DotRecord::class);
     }
 
-    
+    public function properties()
+    {
+        return $this->pluck('property_value', 'property_name')->toArray();
+    }
 
 
 

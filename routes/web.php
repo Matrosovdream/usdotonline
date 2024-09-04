@@ -4,56 +4,28 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
+use App\Models\DotRecord;
 use App\Http\Middleware\RoleMiddleware;
 
-
-Route::get('/', [App\Http\Controllers\FrontPage::class, 'index'])->name('frontpage');
-
-
-Route::get('/records', function() {
-
-    $recordCount = DotRecord::whereNotNull('created_at')->count();
-
-    $records = DotRecord::whereNotNull('created_at')
-                ->orderBy('created_at', 'desc')
-                ->paginate(5);
-
-    /*
-    $records->load('properties');
-    foreach ($records as $record) {
-        $record->properties()->get();
-    }
-    */
-
-    return view('records', [
-        'recordCount' => $recordCount,
-        'records' => $records
-    ]);
-
-})->name('records');
-
-Route::get('/records/{name}', function($name) {
-
-    $record = DotRecord::where('name', $name)->first();
-
-    $record->properties = $record->properties()->get()->pluck('property_value', 'property_name');
+use App\Http\Controllers\RecordController;
+use App\Http\Controllers\FrontPageController;
+use App\Http\Controllers\AboutPageController;
+use App\Http\Controllers\ContactPageController;
 
 
+Route::get('/', [App\Http\Controllers\FrontPageController::class, 'index'])->name('frontpage');
 
-    if( isset($_GET['debug']) ) {
-
-        dd($record->properties);
-    }
-
-    return view('record', [
-        'record' => $record,
-    ]);
-
-})->name('record');
+Route::get('/about', [AboutPageController::class, 'index'])->name('about.page.index');
+Route::get('/contact', [ContactPageController::class, 'index'])->name('contact.page.index');
 
 
+Route::get('/records', [RecordController::class, 'index'])->name('record.index');
+Route::get('/records/{name}', [RecordController::class, 'single'])->name('record.single');
 
-Route::get('/admin', function(){
+Route::post('/records/{name}/reviews/create', [RecordController::class, 'createReview'])
+->name('record.review.create');
+
+Route::get('/admin', function() {
     return 'Just admin can visit this page';
 })->middleware('role:admin');
 
